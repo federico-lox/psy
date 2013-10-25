@@ -51,6 +51,7 @@ done
 
 if [ ! -f $config ]; then
 	echo " not found"
+	path=$cur_dir
 else
 	echo
 fi
