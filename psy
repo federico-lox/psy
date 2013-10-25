@@ -1,8 +1,8 @@
 #!/bin/env sh
-version="0.1"
+version="0.1.1"
 options=":dhve:p:"
 sync_command="rsync"
-sync_opts="-ahlsz"
+sync_opts="-WEPahls"
 dry_run= # null
 verbose= # null
 cur_dir=`pwd`
@@ -87,5 +87,5 @@ for pattern in ${excludes[@]}; do
 done
 
 echo "Synchronizing $path to $destination..."
-$sync_command $sync_opts --delete $path $destination
+$sync_command $sync_opts --inplace --delete $path $destination
 echo "Done"
