@@ -45,7 +45,9 @@ Usage: psy [OPTIONS]
 ```
 
 When invoked, psy will look up for a psy.cfg file (more on it later on)
-recursively starting from the current folder up the directory tree.
+recursively starting from the current folder up the directory tree, the
+that folder will be identified as the tree to synchronize (i.e. source),
+if no psy.cfg will be found then the current directory will be used.
 
 The settings in your psy.cfg can be overridden via the command's options.
 
