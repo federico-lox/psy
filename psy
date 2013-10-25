@@ -1,0 +1,90 @@
+#!/bin/env sh
+version="0.1"
+options=":dhve:p:"
+sync_command="rsync"
+sync_opts="-ahlsz"
+dry_run= # null
+verbose= # null
+cur_dir=`pwd`
+path="$cur_dir"
+destination= #null
+config= # null
+excludes=()
+
+
+function usage () {
+	cat <<EOF
+    Usage: psy [OPTIONS]
+
+    OPTIONS:
+        -d    Dry run mode, displays the sync command without running it.
+        -e    Exclude pattern, see http://ss64.com/bash/rsync.html#exclude
+        -h    Displays this usage message.
+        -p    Destination path.
+        -v    Verbose mode, displays syncing information.
+EOF
+	exit 0
+}
+
+echo "PathSYnchronization version $version"
+echo
+
+command -v $sync_command >/dev/null 2>&1 || {
+	echo "ERROR: $sync_command is not installed, aborting."
+	exit 1
+}
+
+echo -n "Searching for psy.cfg..."
+
+while [ "$path" != "/" ]; do
+	config=$path/psy.cfg
+
+	if [ -f $config ]; then
+		echo " found at $config"
+		. $config
+		break
+	fi
+
+	cd ../
+	path="`pwd`"
+done
+
+if [ ! -f $config ]; then
+	echo " not found"
+else
+	echo
+fi
+
+while getopts "$options" option; do
+	case $option in
+		d) dry_run='yes' ;;
+		e) excludes+=("$OPTARG") ;;
+		h) usage ;;
+		p) destination="$OPTARG" ;;
+		v) verbose='yes' ;;
+		\?) echo "ERROR: Invalid option -$OPTARG" >&2; exit 1 ;;
+		:) echo "ERROR: Option -$OPTARG requires an argument. See -h for details." >&2; exit 1 ;;
+	esac
+done
+
+if [ -z "$destination" ]; then
+	echo "ERROR: please specify a destination either in psy.cfg" \
+		"or as a parameter"
+	exit 1
+fi
+
+if [ -n "$verbose" ] ; then
+	sync_opts+="v"
+fi
+
+if [ -n "$dry_run" ] ; then
+	sync_opts+=" --dry-run"
+fi
+
+for pattern in ${excludes[@]}; do
+	sync_opts+=" --exclude=$pattern"
+done
+
+echo "Synchronizing $path to $destination..."
+$sync_command $sync_opts --delete $path $destination
+echo "Done"
